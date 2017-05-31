@@ -640,10 +640,15 @@ export default class Dropdown extends Component {
 
   handleClick = (e) => {
     debug('handleClick()', e)
-    const { onClick } = this.props
+
+    const { minCharacters, onClick, search } = this.props
+    const { searchQuery } = this.state
+
     if (onClick) onClick(e, this.props)
     // prevent closeOnDocumentClick()
     e.stopPropagation()
+
+    if(search && searchQuery.length < minCharacters) return
     this.toggle(e)
   }
 
@@ -717,16 +722,17 @@ export default class Dropdown extends Component {
     const newQuery = e.target.value
 
     if (onSearchChange) onSearchChange(e, newQuery)
+    this.setState({
+      selectedIndex: 0,
+      searchQuery: newQuery,
+    })
 
-    if (newQuery.length >= minCharacters) {
-      // open search dropdown on search query
-      if (search && newQuery && !open) this.open()
-
-      this.setState({
-        selectedIndex: 0,
-        searchQuery: newQuery,
-      })
+    if(search && newQuery && open && newQuery.length < minCharacters) {
+      this.close()
+      return
     }
+    // open search dropdown on search query
+    if (search && newQuery && !open && newQuery.length >= minCharacters) this.open()
   }
 
   // ----------------------------------------
